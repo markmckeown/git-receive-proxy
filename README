@@ -1,0 +1,57 @@
+Git Receive Pack Proxy HTTP
+===========================
+
+Normal chain of processes when invoking Git push is:
+
+
+gsp <-> ssh <----> ssh <-> grp
+
+Where gsp is git-send-pack and grp is git-receive-pack.
+This executable acts as a proxy between gsp and grp 
+and a http Git server forwarding traffic between them:
+
+gsp <-> ssh <----> ssh <-> grp-proxy <-> grp
+                               |
+                               +----> HTTP Git Server
+
+The grp-proxy takes a copy of the packfile and stores
+a copy in /tmp. The proxy forwards the advertise 
+refs call to grp, the packfile + updates it wraps into
+HTTP and sends to the HTTP Git Server. The Git HTTP
+server and grp must resolve to the same repo - this is 
+fiddly at the minute.
+
+
+
+Build
+======
+Build requires libevent2 and OpenSSL libraries
+
+On Ubuntu 12.04:
+
+    sudo apt-get install libevent-2.0-5 libevent-extra-2.0-5 \
+                    libevent-dev libssl-dev
+
+To build
+    make
+
+
+The executable that is built is grp-proxy (git receive pack proxy).
+
+Running
+=======
+To use:
+
+    git push --receive-pack=/home/mmk/grp-proxy/grp-proxy
+
+Where the path is the to grp-proxy on the machine you are
+pushing to. The HTTP Git server must be running on 127.0.0.1
+and port 8080, it must be configured to allow anynomous 
+receive-pack.
+
+Third party licenses
+====================
+
+http_parser.c and http_parser.h have a BSD style license included in them.
+
+
